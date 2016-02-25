@@ -1,7 +1,7 @@
 {
   "name": "async-json-serializer",
-  "version": "0.0.0",
-  "description": "A library to stringify a JSON object across multiple async callbacks.",
+  "version": "0.0.1",
+  "description": "A library to serialize a JSON object across multiple async callbacks.",
   "main": "src/async-json-serializer.js",
   "scripts": {
     "test": "mocha ./test/helpers/setup test/*",
@@ -24,9 +24,9 @@
     "json",
     "async",
     "stringify",
-    "idle"
+    "serialize"
   ],
-  "author": "",
+  "author": "Antonio Scandurra <me@as-cii.com>",
   "license": "MIT",
   "devDependencies": {
     "babel-eslint": "^4.0.5",
@@ -36,5 +36,25 @@
     "mocha": "^2.3.4",
     "random-seed": "^0.3.0",
     "standard": "^4.5.4"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^2.3.0",
+    "babel": "^5.8.35",
+    "random-seed": "^0.3.0",
+    "electron-mocha": "^0.2.1",
+    "electron-prebuilt": "^0.36.8",
+    "babel-eslint": "^4.1.8",
+    "standard": "^4.5.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/as-cii/async-json-serializer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/as-cii/async-json-serializer/issues"
+  },
+  "homepage": "https://github.com/as-cii/async-json-serializer#readme"
 }
