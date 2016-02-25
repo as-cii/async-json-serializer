@@ -1,6 +1,6 @@
 {
   "name": "async-json-serializer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A library to serialize a JSON object across multiple async callbacks.",
   "main": "src/async-json-serializer.js",
   "scripts": {
