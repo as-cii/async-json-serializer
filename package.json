@@ -40,15 +40,6 @@
   "directories": {
     "test": "test"
   },
-  "dependencies": {
-    "chai": "^2.3.0",
-    "babel": "^5.8.35",
-    "random-seed": "^0.3.0",
-    "electron-mocha": "^0.2.1",
-    "electron-prebuilt": "^0.36.8",
-    "babel-eslint": "^4.1.8",
-    "standard": "^4.5.4"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/as-cii/async-json-serializer.git"
