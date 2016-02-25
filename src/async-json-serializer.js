@@ -1,71 +1,88 @@
-const IMMEDIATE_DEADLINE = {timeRemaining: () => 0}
+'use strict'
 
-export default class AsyncJsonSerializer {
+const IMMEDIATE_DEADLINE = {timeRemaining: function () { return 0 }}
+
+module.exports =
+class AsyncJsonSerializer {
   constructor (nextCallback) {
     this.nextCallback = nextCallback
   }
 
-  stringify (object, deadline = IMMEDIATE_DEADLINE) {
+  stringify (object, callback, deadlineObject) {
+    let deadline = deadlineObject || IMMEDIATE_DEADLINE
     let performStringification = (deadline) => {
       switch (Object.prototype.toString.apply(object)) {
         case '[object Array]':
-          return this.stringifyArray(object, deadline)
+        this.stringifyArray(object, callback, deadline)
+        break
         case '[object Object]':
-          return this.stringifyObject(object, deadline)
+        this.stringifyObject(object, callback, deadline)
+        break
         case '[object Number]':
-          return Promise.resolve(object)
+        callback(object)
+        break
         case '[object String]':
-          return Promise.resolve(`"${object}"`)
+        callback(`"${object}"`)
+        break
+        case '[object Boolean]':
+        callback(`${object}`)
+        break
         case '[object Null]':
-          return Promise.resolve('null')
+        callback('null')
+        break
         case '[object Undefined]':
-          return Promise.resolve(null)
+        callback(null)
+        break
+        default:
+        throw new Error('Unsupported object.')
       }
     }
 
     if (deadline.timeRemaining() <= 0) {
-      return this.nextCallback().then(performStringification)
+      this.nextCallback(performStringification)
     } else {
-      return performStringification(deadline)
+      performStringification(deadline)
     }
   }
 
-  stringifyObject (object, deadline) {
+  stringifyObject (object, callback, deadline) {
     let keys = Object.keys(object)
     let processKey = (string, index) => {
       if (index === keys.length) {
-        return Promise.resolve('{' + string.slice(1) + '}')
+        callback('{' + string.slice(1) + '}')
+        return
       }
 
       let key = keys[index]
-      return this.stringify(object[key], deadline).then((stringifiedValue) => {
+      this.stringify(object[key], (stringifiedValue) => {
         if (stringifiedValue == null) {
-          return processKey(string, index + 1)
+          processKey(string, index + 1)
         } else {
-          return processKey(string + `, "${key.toString()}": ${stringifiedValue}`, index + 1)
+          processKey(string + `, "${key.toString()}": ${stringifiedValue}`, index + 1)
         }
-      })
+      }, deadline)
     }
 
-    return processKey('', 0)
+    processKey('', 0)
   }
 
-  stringifyArray (array, deadline) {
+  stringifyArray (array, callback, deadline) {
     let processValue = (string, index) => {
       if (index === array.length) {
-        return Promise.resolve('[' + string.slice(0, -1) + ']')
+        callback('[' + string.slice(0, -1) + ']')
+        return
       }
 
       let value = array[index]
-      return this.stringify(value, deadline).then((stringifiedValue) => {
+      this.stringify(value, (stringifiedValue) => {
         if (stringifiedValue == null) {
-          return processValue(string, index + 1)
+          processValue(string, index + 1)
         } else {
-          return processValue(string + `${stringifiedValue},`, index + 1)
+          processValue(string + `${stringifiedValue},`, index + 1)
         }
-      })
+      }, deadline)
     }
 
-    return processValue('', 0)
+    processValue('', 0)
   }
 }

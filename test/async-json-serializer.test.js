@@ -1,53 +1,58 @@
-import AsyncJsonSerializer from '../src/async-json-serializer'
-import Random from 'random-seed'
+'use strict'
+
+let AsyncJsonSerializer = require('../src/async-json-serializer')
+let Random = require('random-seed')
 
 describe('AsyncJsonSerializer', function () {
-  function synchronousCallback () {
-    let timeRemaining = 3
-
-    return new Promise(function (resolve) {
-      let deadline = {timeRemaining: function () {
+  function synchronousCallback (callback) {
+    let timeRemaining = 2000
+    let deadline = {
+      timeRemaining: function () {
         timeRemaining--
         return timeRemaining
-      }}
+      }
+    }
 
-      resolve(deadline)
-    })
+    process.nextTick(function () { callback(deadline) })
   }
 
-  describe('.prototype.stringify(object)', function () {
-    it('returns a Promise that resolves to the JSON string representation of the object', async function () {
-      this.timeout(Infinity)
+  describe('.prototype.stringify(object, callback)', function () {
+    for (let i = 0; i < 100; i++) {
+      it('invokes the passed callback with the JSON string representation of the object', function (done) {
+        this.timeout(Infinity)
 
-      let serializer = new AsyncJsonSerializer(synchronousCallback)
-      for (let i = 0; i < 100; i++) {
         let seed = Date.now()
         let random = new Random(seed)
-        let object = createRandomNestedObject(random, {}, 5)
-        let asyncJsonString = await serializer.stringify(object)
+        let serializer = new AsyncJsonSerializer(synchronousCallback)
+        let object = createRandomNestedObject(random, {}, 10)
         let referenceJsonString = JSON.stringify(object)
-        assert.deepEqual(JSON.parse(asyncJsonString), JSON.parse(referenceJsonString), `Failed with seed: ${seed}`)
-      }
-    })
+        serializer.stringify(object, function (asyncJsonString) {
+          assert.deepEqual(JSON.parse(asyncJsonString), JSON.parse(referenceJsonString))
+          done()
+        })
+      })
+    }
 
     function createRandomArray (random, upperBound) {
       let array = []
-      for (var i = 0; i < random(10); i++) {
+      for (let i = 0; i < random(10); i++) {
         array.push(createRandomNestedObject(random, {}, upperBound))
       }
       return array
     }
 
     function createRandomPrimitive (random) {
-      let n = random(4)
+      let n = random(5)
       if (n === 0) {
         return 'abcdefghijk'
       } else if (n === 1) {
         return 42
       } else if (n === 2) {
         return null
-      } else {
+      } else if (n === 3) {
         return undefined
+      } else if (n === 4) {
+        return Boolean(random(2))
       }
     }
 
